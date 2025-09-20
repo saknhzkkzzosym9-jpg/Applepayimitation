@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Імітація оплати</title>
+<style>
+  body {
+    margin: 0;
+    font-family: 'Arial', sans-serif;
+    background-color: #0b0b0f;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+  }
+
+  .card {
+    width: 320px;
+    height: 200px;
+    background: linear-gradient(145deg, #0d6340, #0f7a55);
+    border-radius: 20px;
+    position: relative;
+    padding: 20px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    color: white;
+    font-weight: bold;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.4), inset 0 -3px 10px rgba(255,255,255,0.05);
+    margin-bottom: 50px;
+    overflow: hidden;
+    transform: translateY(-50px);
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: -30%;
+    left: -30%;
+    width: 160%;
+    height: 60%;
+    background: radial-gradient(circle at top left, rgba(255,255,255,0.15), transparent 60%);
+    transform: rotate(-25deg);
+    pointer-events: none;
+  }
+
+  .bank-logo {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    font-size: 1em;
+    font-weight: bold;
+    color: rgba(255,255,255,0.8);
+  }
+
+  .card-number {
+    font-size: 1.3em;
+    letter-spacing: 3px;
+    margin-bottom: 10px;
+  }
+
+  .card .visa {
+    position: absolute;
+    bottom: 15px;
+    right: 20px;
+    font-size: 1.2em;
+  }
+
+  .circle {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background-color: #1a1a1a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 20px;
+    font-size: 40px;
+  }
+
+  .phone {
+    position: absolute;
+    animation: movePhone 1.2s infinite alternate ease-in-out;
+  }
+
+  @keyframes movePhone {
+    0% { transform: translateY(0); }
+    50% { transform: translateY(-20px); }
+    100% { transform: translateY(0); }
+  }
+
+  .spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid rgba(255,255,255,0.2);
+    border-top-color: #00e676;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    position: absolute;
+    display: none;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg);}
+    100% { transform: rotate(360deg);}
+  }
+
+  svg.check {
+    width: 60px;
+    height: 60px;
+    stroke: #00e676;
+    stroke-width: 6;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 100;
+    stroke-dashoffset: 100;
+    position: absolute;
+    display: none;
+  }
+
+  .status-text {
+    font-size: 1.2em;
+    text-align: center;
+    margin-bottom: 10px;
+    min-height: 1.5em;
+    transition: all 1s ease-in-out;
+  }
+
+  .status-text.fade {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+
+  .bottom-text {
+    font-size: 1em;
+    color: #ccc;
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="bank-logo">PrivatBank</div>
+  <div class="card-number">**** **** **** 1234</div>
+  <div class="visa">Visa</div>
+</div>
+
+<div class="circle">
+  <div class="phone">📱</div>
+  <div class="spinner"></div>
+  <svg class="check" viewBox="0 0 24 24">
+    <path d="M4 12l6 6L20 6"></path>
+  </svg>
+</div>
+
+<div class="status-text">Тримайте біля терміналу.</div>
+<div class="bottom-text">Торкніться для початку</div>
+
+<script>
+const statusText = document.querySelector('.status-text');
+const check = document.querySelector('.check');
+const spinner = document.querySelector('.spinner');
+const phone = document.querySelector('.phone');
+
+const messages = [
+  'Перевірка звʼязку',
+  'Перевірка балансу',
+  'Перевірка оператора',
+  'Звʼязок з банком',
+  'Сплачування'
+];
+
+async function animateDots(text, duration) {
+  return new Promise(res => {
+    let count = 0;
+    const interval = setInterval(() => {
+      statusText.textContent = text + '.'.repeat(count % 4);
+      count++;
+    }, 200);
+    setTimeout(() => {
+      clearInterval(interval);
+      statusText.textContent = text;
+      res();
+    }, duration);
+  });
+}
+
+async function startPaymentCycle() {
+  if (phone) phone.style.display = 'block';
+  spinner.style.display = 'none';
+  check.style.display = 'none';
+  statusText.classList.remove('fade');
+  statusText.style.opacity = 1;
+  statusText.style.transform = 'translateY(0)';
+  statusText.textContent = 'Тримайте біля терміналу.';
+
+  await new Promise(res => {
+    const startHandler = () => {
+      document.body.removeEventListener('click', startHandler);
+      res();
+    };
+    document.body.addEventListener('click', startHandler);
+  });
+
+  if (phone) phone.style.display = 'none';
+  spinner.style.display = 'block';
+
+  for (let i = 0; i < messages.length; i++) {
+    let msg = messages[i];
+    let dur = (i === messages.length -1) ? 2000 : 800;
+    await animateDots(msg, dur);
+  }
+
+  spinner.style.display = 'none';
+  check.style.display = 'block';
+  check.style.transition = 'none';
+  check.style.strokeDashoffset = 100;
+  setTimeout(() => {
+    check.style.transition = 'stroke-dashoffset 1s ease-in-out';
+    check.style.strokeDashoffset = 0;
+  }, 50);
+
+  statusText.textContent = 'Операція успішна, кошти зняті.';
+
+  setTimeout(() => {
+    statusText.classList.add('fade');
+    setTimeout(() => {
+      startPaymentCycle();
+    }, 1000);
+  }, 6000);
+}
+
+startPaymentCycle();
+</script>
+
+</body>
+</html>
