@@ -8,15 +8,17 @@
   body {
     margin: 0;
     font-family: 'Arial', sans-serif;
-    background-color: #0b0b0f;
+    background: #0b0b0f;
     color: #fff;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     height: 100vh;
+    overflow: hidden;
+    transition: background 1s ease-in-out;
+    position: relative;
   }
-
   .card {
     width: 320px;
     height: 200px;
@@ -33,21 +35,15 @@
     box-shadow: 0 10px 25px rgba(0,0,0,0.4), inset 0 -3px 10px rgba(255,255,255,0.05);
     margin-bottom: 50px;
     overflow: hidden;
-    transform: translateY(-50px);
+    transform: translateY(-100vh);
+    animation: slideDown 1s ease-out forwards;
+    transition: background 0.5s ease-in-out;
   }
-
-  .card::before {
-    content: '';
-    position: absolute;
-    top: -30%;
-    left: -30%;
-    width: 160%;
-    height: 60%;
-    background: radial-gradient(circle at top left, rgba(255,255,255,0.15), transparent 60%);
-    transform: rotate(-25deg);
-    pointer-events: none;
+  @keyframes slideDown {
+    0% { transform: translateY(-100vh); opacity: 0; }
+    60% { transform: translateY(30px); opacity: 1; }
+    100% { transform: translateY(-50px); }
   }
-
   .bank-logo {
     position: absolute;
     top: 20px;
@@ -56,20 +52,17 @@
     font-weight: bold;
     color: rgba(255,255,255,0.8);
   }
-
   .card-number {
     font-size: 1.3em;
     letter-spacing: 3px;
     margin-bottom: 10px;
   }
-
   .card .visa {
     position: absolute;
     bottom: 15px;
     right: 20px;
     font-size: 1.2em;
   }
-
   .circle {
     width: 120px;
     height: 120px;
@@ -83,18 +76,12 @@
     margin-bottom: 20px;
     font-size: 40px;
   }
-
-  .phone {
-    position: absolute;
-    animation: movePhone 1.2s infinite alternate ease-in-out;
-  }
-
+  .phone { position: absolute; animation: movePhone 1.2s infinite alternate ease-in-out; }
   @keyframes movePhone {
     0% { transform: translateY(0); }
     50% { transform: translateY(-20px); }
     100% { transform: translateY(0); }
   }
-
   .spinner {
     width: 50px;
     height: 50px;
@@ -105,12 +92,7 @@
     position: absolute;
     display: none;
   }
-
-  @keyframes spin {
-    0% { transform: rotate(0deg);}
-    100% { transform: rotate(360deg);}
-  }
-
+  @keyframes spin { 0% { transform: rotate(0deg);} 100% { transform: rotate(360deg);} }
   svg.check {
     width: 60px;
     height: 60px;
@@ -124,121 +106,93 @@
     position: absolute;
     display: none;
   }
-
-  .status-text {
-    font-size: 1.2em;
-    text-align: center;
-    margin-bottom: 10px;
-    min-height: 1.5em;
-    transition: all 1s ease-in-out;
+  .status-text { font-size: 1.2em; text-align: center; margin-bottom: 10px; min-height: 1.5em; transition: all 1s ease-in-out; }
+  .status-text.fade { opacity: 0; transform: translateY(-30px); }
+  .bottom-text { font-size: 1em; color: #ccc; }
+  .settings-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    font-size: 1.5em; 
+    background: #222;
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    width: 50px;  
+    height: 50px; 
+    cursor: pointer;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
-
-  .status-text.fade {
-    opacity: 0;
-    transform: translateY(-30px);
+  .settings-popup {
+    position: fixed;
+    bottom: 80px;
+    right: 20px;
+    background: #111;
+    padding: 15px;
+    border-radius: 10px;
+    display: none;
+    flex-direction: column;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.5);
   }
-
-  .bottom-text {
+  .settings-popup label { margin-bottom: 5px; }
+  .settings-popup input[type="color"] { width: 100%; height: 30px; border: none; cursor: pointer; }
+  #continueBtn {
+    margin-top: 10px;
+    padding: 10px 20px;
     font-size: 1em;
-    color: #ccc;
+    border: none;
+    border-radius: 10px;
+    background-color: #0a84ff;
+    color: white;
+    cursor: pointer;
+    opacity: 1;
+    transition: opacity 0.5s ease-in-out;
   }
+  #continueBtn.hidden { opacity: 0; pointer-events: none; }
 </style>
 </head>
 <body>
-
 <div class="card">
   <div class="bank-logo">PrivatBank</div>
-  <div class="card-number">**** **** **** 1234</div>
+  <div class="card-number" id="cardNumber">••••1234</div>
   <div class="visa">Visa</div>
 </div>
-
 <div class="circle">
   <div class="phone">📱</div>
   <div class="spinner"></div>
-  <svg class="check" viewBox="0 0 24 24">
-    <path d="M4 12l6 6L20 6"></path>
-  </svg>
+  <svg class="check" viewBox="0 0 24 24"><path d="M4 12l6 6L20 6"></path></svg>
 </div>
-
 <div class="status-text">Тримайте біля терміналу.</div>
 <div class="bottom-text">Торкніться для початку</div>
-
+<button id="continueBtn">Продовжити</button>
+<button class="settings-btn">⚙️</button>
+<div class="settings-popup">
+  <label for="cardColor">Колір картки:</label>
+  <input type="color" id="cardColor" value="#0d6340">
+</div>
 <script>
 const statusText = document.querySelector('.status-text');
 const check = document.querySelector('.check');
 const spinner = document.querySelector('.spinner');
 const phone = document.querySelector('.phone');
-
-const messages = [
-  'Перевірка звʼязку',
-  'Перевірка балансу',
-  'Перевірка оператора',
-  'Звʼязок з банком',
-  'Сплачування'
-];
-
-async function animateDots(text, duration) {
-  return new Promise(res => {
-    let count = 0;
-    const interval = setInterval(() => {
-      statusText.textContent = text + '.'.repeat(count % 4);
-      count++;
-    }, 200);
-    setTimeout(() => {
-      clearInterval(interval);
-      statusText.textContent = text;
-      res();
-    }, duration);
-  });
-}
-
-async function startPaymentCycle() {
-  if (phone) phone.style.display = 'block';
-  spinner.style.display = 'none';
-  check.style.display = 'none';
-  statusText.classList.remove('fade');
-  statusText.style.opacity = 1;
-  statusText.style.transform = 'translateY(0)';
-  statusText.textContent = 'Тримайте біля терміналу.';
-
-  await new Promise(res => {
-    const startHandler = () => {
-      document.body.removeEventListener('click', startHandler);
-      res();
-    };
-    document.body.addEventListener('click', startHandler);
-  });
-
-  if (phone) phone.style.display = 'none';
-  spinner.style.display = 'block';
-
-  for (let i = 0; i < messages.length; i++) {
-    let msg = messages[i];
-    let dur = (i === messages.length -1) ? 2000 : 800;
-    await animateDots(msg, dur);
-  }
-
-  spinner.style.display = 'none';
-  check.style.display = 'block';
-  check.style.transition = 'none';
-  check.style.strokeDashoffset = 100;
-  setTimeout(() => {
-    check.style.transition = 'stroke-dashoffset 1s ease-in-out';
-    check.style.strokeDashoffset = 0;
-  }, 50);
-
-  statusText.textContent = 'Операція успішна, кошти зняті.';
-
-  setTimeout(() => {
-    statusText.classList.add('fade');
-    setTimeout(() => {
-      startPaymentCycle();
-    }, 1000);
-  }, 6000);
-}
-
+const card = document.querySelector('.card');
+const cardNumberEl = document.getElementById('cardNumber');
+const settingsBtn = document.querySelector('.settings-btn');
+const settingsPopup = document.querySelector('.settings-popup');
+const cardColorInput = document.querySelector('#cardColor');
+const continueBtn = document.getElementById('continueBtn');
+const messages = ['Перевірка звʼязку','Перевірка балансу','Перевірка оператора','Звʼязок з банком','Сплачування'];
+function generateCardNumber() { const last4 = Math.floor(1000 + Math.random()*9000); cardNumberEl.textContent = `••••${last4}`; }
+generateCardNumber();
+settingsBtn.addEventListener('click',()=>{ settingsPopup.style.display = settingsPopup.style.display==='flex'?'none':'flex'; });
+cardColorInput.addEventListener('input',()=>{ const color = cardColorInput.value; card.style.background=`linear-gradient(145deg, ${color}, ${shadeColor(color,20)})`; });
+function shadeColor(color,percent){ const f=parseInt(color.slice(1),16),t=percent<0?0:255,p=Math.abs(percent)/100,R=f>>16,G=f>>8&0x00FF,B=f&0x0000FF; return `rgb(${Math.round((t-R)*p)+R},${Math.round((t-G)*p)+G},${Math.round((t-B)*p)+B})`; }
+function animateDots(text,duration){ return new Promise(res=>{ let count=0; const interval=setInterval(()=>{ statusText.textContent=text+'.'.repeat(count%4); count++; },200); setTimeout(()=>{ clearInterval(interval); statusText.textContent=text; res(); },duration); }); }
+async function startPaymentCycle(){ continueBtn.classList.remove('hidden'); await new Promise(res=>{ const clickHandler=()=>{ continueBtn.removeEventListener('click',clickHandler); continueBtn.classList.add('hidden'); setTimeout(res,2000); }; continueBtn.addEventListener('click',clickHandler); }); if(phone)phone.style.display='block'; spinner.style.display='none'; check.style.display='none'; statusText.classList.remove('fade'); statusText.style.opacity=1; statusText.style.transform='translateY(0)'; statusText.textContent='Тримайте біля терміналу.'; document.body.style.background='#0b0b0f'; if(phone)phone.style.display='none'; spinner.style.display='block'; document.body.style.background='#103214'; for(let i=0;i<messages.length;i++){ let msg=messages[i]; let dur=(i===messages.length-1)?2000:800; await animateDots(msg,dur); } spinner.style.display='none'; check.style.display='block'; check.style.transition='none'; check.style.strokeDashoffset=100; setTimeout(()=>{ check.style.transition='stroke-dashoffset 1s ease-in-out'; check.style.strokeDashoffset=0; },50); statusText.textContent='Операція успішна, кошти зняті.'; document.body.style.background='#105020'; setTimeout(()=>{ statusText.classList.add('fade'); setTimeout(()=>{ startPaymentCycle(); },1000); },6000); }
 startPaymentCycle();
 </script>
-
 </body>
 </html>
